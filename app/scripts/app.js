@@ -55,9 +55,19 @@ proper order even if all the requests haven't finished.
 
   window.addEventListener('WebComponentsReady', function() {
     home = document.querySelector('section[data-route="home"]');
-    /*
-    Your code goes here!
-     */
-    // getJSON('../data/earth-like-results.json')
+
+    getJSON('../data/earth-like-results.json')
+    .then(function(response) {
+      addSearchHeader(response.query);
+      return Promise.all(response.results.map(getJSON));
+    })
+    .then(function(arrayPromisses) {
+      arrayPromisses.forEach(function(planetData) {
+        createPlanetThumb(planetData);
+      });
+    })
+    .catch(function(e) {
+      console.log(e);
+    });
   });
 })(document);
