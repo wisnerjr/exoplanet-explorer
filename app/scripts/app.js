@@ -9,7 +9,7 @@ Hint: you'll probably still need to use .map.
 // Inline configuration for jshint below. Prevents `gulp jshint` from failing with quiz starter code.
 /* jshint unused: false */
 
-(function(document) {
+(function (document) {
   'use strict';
 
   var home = null;
@@ -49,24 +49,26 @@ Hint: you'll probably still need to use .map.
    * @return {Promise}    - A promise that passes the parsed JSON response.
    */
   function getJSON(url) {
-    return get(url).then(function(response) {
+    return get(url).then(function (response) {
       return response.json();
     });
   }
 
-  window.addEventListener('WebComponentsReady', function() {
+  window.addEventListener('WebComponentsReady', function () {
     home = document.querySelector('section[data-route="home"]');
-    /*
-    Refactor this code with Promise.all!
-     */
+
     getJSON('../data/earth-like-results.json')
-    .then(function(response) {
-
-      addSearchHeader(response.query);
-
-      response.results.map(function(url) {
-        getJSON(url).then(createPlanetThumb);
+      .then(function (response) {
+        addSearchHeader(response.query);
+        return Promise.all(response.results.map(getJSON));
+      })
+      .then(function(arrayData) {
+        arrayData.forEach(function (planet) {
+          createPlanetThumb(planet);
+        });
+      })
+      .catch(function (e) {
+        console.log(e);
       });
-    });
   });
 })(document);
